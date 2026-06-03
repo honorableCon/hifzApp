@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  LEARNER
+  PARENT
+  TEACHER
+  ADMIN
+}
+
+enum ProfileType {
+  CHILD
+  TEEN
+  ACTIVE_ADULT
+  INTENSIVE_STUDENT
+  SENIOR
+  HAFIZ_REVISION
+}
+
+enum MemorizationStatus {
+  PLANNED
+  LEARNING
+  REVIEWING
+  MASTERED
+  PAUSED
+}
+
+enum SrsStrength {
+  FRAGILE
+  STABLE
+  SOLID
+}
+
+enum SessionType {
+  MEMORIZATION
+  REVIEW
+  LISTENING
+  WRITING
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(LEARNER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       AuthSession[]
+  profiles       Profile[]
+  parentChildren ParentChild[] @relation("Parent")
+  childParents   ParentChild[] @relation("Child")
+  badges         UserBadge[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model AuthSession {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model ParentChild {
+  id        String   @id @default(cuid())
+  parentId  String
+  childId   String
+  createdAt DateTime @default(now())
+
+  parent User @relation("Parent", fields: [parentId], references: [id], onDelete: Cascade)
+  child  User @relation("Child", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, childId])
+  @@index([childId])
+}
+
+model Profile {
+  id                String      @id @default(cuid())
+  userId            String
+  type              ProfileType
+  ageRange          String
+  dailyMinutes      Int
+  level             String
+  objective         String
+  preferredMethod   String
+  preferredReciter  String
+  childModeEnabled  Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memorizations  Memorization[]
+  learningPlans  LearningPlan[]
+  learningSessions LearningSession[]
+
+  @@index([userId])
+}
+
+model LearningPlan {
+  id               String   @id @default(cuid())
+  profileId        String
+  targetLabel      String
+  versesPerDay     Int
+  recommendedMethods String[]
+  milestone30      String
+  milestone90      String
+  milestone180     String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Verse {
+  id           String   @id @default(cuid())
+  surahNumber  Int
+  verseNumber  Int
+  juzNumber    Int
+  arabic       String
+  translation  String?
+  tajwidHints  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memorizations Memorization[]
+  srsCards      SrsCard[]
+
+  @@unique([surahNumber, verseNumber])
+  @@index([juzNumber])
+}
+
+model Memorization {
+  id          String              @id @default(cuid())
+  profileId   String
+  verseId     String
+  status      MemorizationStatus  @default(PLANNED)
+  repetitions Int                 @default(0)
+  retention   Int                 @default(0)
+  startedAt   DateTime?
+  masteredAt  DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  verse   Verse   @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  srsCard SrsCard?
+
+  @@unique([profileId, verseId])
+  @@index([status])
+}
+
+model SrsCard {
+  id              String      @id @default(cuid())
+  profileId       String
+  verseId         String
+  memorizationId  String      @unique
+  strength        SrsStrength @default(FRAGILE)
+  intervalDays    Int         @default(1)
+  easeFactor      Float       @default(2.5)
+  dueAt           DateTime
+  lastReviewedAt  DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  verse        Verse         @relation(fields: [verseId], references: [id], onDelete: Cascade)
+  memorization Memorization  @relation(fields: [memorizationId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, dueAt])
+  @@index([strength])
+}
+
+model LearningSession {
+  id              String      @id @default(cuid())
+  profileId       String
+  type            SessionType
+  durationMinutes Int
+  score           Int?
+  notes           String?
+  createdAt       DateTime    @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String
+  icon        String
+  createdAt   DateTime    @default(now())
+
+  users UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([badgeId])
+}
