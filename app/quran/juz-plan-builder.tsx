@@ -5,31 +5,60 @@ import { useState } from "react";
 type Level = "beginner" | "intermediate" | "advanced" | "hafiz";
 
 const LEVEL_SETTINGS = {
-  beginner: { label: "Débutant", versesPerDay: 3, desc: "Tranquille et régulier", color: "bg-blue-100 text-blue-800 border-blue-200" },
-  intermediate: { label: "Intermédiaire", versesPerDay: 5, desc: "Rythme standard", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  advanced: { label: "Avancé", versesPerDay: 10, desc: "Pour les plus motivés", color: "bg-amber-100 text-amber-800 border-amber-200" },
-  hafiz: { label: "Hafiz (Révision)", versesPerDay: 20, desc: "Révision intensive", color: "bg-purple-100 text-purple-800 border-purple-200" },
+  beginner: { label: "Débutant", wordsPerDay: 40, desc: "Tranquille et régulier (~3 lignes/j)", color: "bg-blue-100 text-blue-800 border-blue-200" },
+  intermediate: { label: "Intermédiaire", wordsPerDay: 80, desc: "Rythme standard (~demi-page/j)", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  advanced: { label: "Avancé", wordsPerDay: 160, desc: "Pour les plus motivés (~1 page/j)", color: "bg-amber-100 text-amber-800 border-amber-200" },
+  hafiz: { label: "Hafiz (Révision)", wordsPerDay: 400, desc: "Révision intensive (~1/4 de Juz/j)", color: "bg-purple-100 text-purple-800 border-purple-200" },
 };
 
 export function JuzPlanBuilder({ juz, verses }: { juz: number, verses: any[] }) {
   const [level, setLevel] = useState<Level>("intermediate");
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const versesPerDay = LEVEL_SETTINGS[level].versesPerDay;
+  const targetWords = LEVEL_SETTINGS[level].wordsPerDay;
 
   const generatePlan = () => {
     const days = [];
-    for (let i = 0; i < verses.length; i += versesPerDay) {
-      const dayVerses = verses.slice(i, i + versesPerDay);
+    let currentDayVerses = [];
+    let currentWordCount = 0;
+
+    for (let i = 0; i < verses.length; i++) {
+      const verse = verses[i];
+      // Compter le nombre de mots arabes dans le verset
+      const verseWords = verse.arabic.split(" ").filter((w: string) => w.trim().length > 0).length;
+      
+      currentDayVerses.push(verse);
+      currentWordCount += verseWords;
+
+      // Si on a atteint ou dépassé la cible de mots (et qu'on n'est pas au dernier verset)
+      if (currentWordCount >= targetWords && i !== verses.length - 1) {
+        days.push({
+          dayNumber: days.length + 1,
+          verses: [...currentDayVerses],
+          wordCount: currentWordCount,
+          startSurah: currentDayVerses[0].surahNumber,
+          startVerse: currentDayVerses[0].verseNumber,
+          endSurah: currentDayVerses[currentDayVerses.length - 1].surahNumber,
+          endVerse: currentDayVerses[currentDayVerses.length - 1].verseNumber,
+        });
+        currentDayVerses = [];
+        currentWordCount = 0;
+      }
+    }
+
+    // S'il reste des versets à la fin
+    if (currentDayVerses.length > 0) {
       days.push({
-        dayNumber: Math.floor(i / versesPerDay) + 1,
-        verses: dayVerses,
-        startSurah: dayVerses[0].surahNumber,
-        startVerse: dayVerses[0].verseNumber,
-        endSurah: dayVerses[dayVerses.length - 1].surahNumber,
-        endVerse: dayVerses[dayVerses.length - 1].verseNumber,
+        dayNumber: days.length + 1,
+        verses: [...currentDayVerses],
+        wordCount: currentWordCount,
+        startSurah: currentDayVerses[0].surahNumber,
+        startVerse: currentDayVerses[0].verseNumber,
+        endSurah: currentDayVerses[currentDayVerses.length - 1].surahNumber,
+        endVerse: currentDayVerses[currentDayVerses.length - 1].verseNumber,
       });
     }
+
     return days;
   };
 
@@ -67,7 +96,7 @@ export function JuzPlanBuilder({ juz, verses }: { juz: number, verses: any[] }) 
                     <div className="flex items-center justify-between w-full mb-1">
                       <span className="font-bold text-emerald-950">{setting.label}</span>
                       <span className={`text-xs font-bold px-2 py-1 rounded-full border ${setting.color}`}>
-                        {setting.versesPerDay} v/jour
+                        ~{setting.wordsPerDay} mots/j
                       </span>
                     </div>
                     <span className="text-sm text-emerald-950/60">{setting.desc}</span>
@@ -90,7 +119,7 @@ export function JuzPlanBuilder({ juz, verses }: { juz: number, verses: any[] }) 
           <div className="mt-6 flex items-center justify-between bg-emerald-100/50 p-4 rounded-2xl border border-emerald-200">
             <div>
               <p className="font-bold text-emerald-950">Rythme : {LEVEL_SETTINGS[level].label}</p>
-              <p className="text-sm text-emerald-900/70">{LEVEL_SETTINGS[level].versesPerDay} versets par jour • Fin dans {planDays.length} jours</p>
+              <p className="text-sm text-emerald-900/70">~{LEVEL_SETTINGS[level].wordsPerDay} mots par jour • Fin dans {planDays.length} jours</p>
             </div>
             <button
               onClick={() => setShowCalendar(false)}
@@ -114,7 +143,7 @@ export function JuzPlanBuilder({ juz, verses }: { juz: number, verses: any[] }) 
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3">
                     <h3 className="font-black text-emerald-900 text-lg">Jour {day.dayNumber}</h3>
                     <div className="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full inline-flex w-fit">
-                      {day.verses.length} versets
+                      {day.verses.length} verset{day.verses.length > 1 ? 's' : ''} (~{day.wordCount} mots)
                     </div>
                   </div>
                   
