@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getAllSurahsMeta, JUZ_COUNT } from "@/lib/quran-meta";
 import { QuranIndex } from "./quran-index";
 import { FullSurahPlayer } from "./full-surah-player";
+import { JuzPlanBuilder } from "./juz-plan-builder";
 
 export default async function QuranPage(props: {
   searchParams: Promise<{ surah?: string; juz?: string }>;
@@ -83,6 +84,11 @@ export default async function QuranPage(props: {
               Retour à l'index
             </Link>
           </div>
+
+          {/* BUILDER DE PLAN DE MEMORISATION (POUR JUZ UNIQUEMENT) */}
+          {currentJuz && verses.length > 0 && (
+            <JuzPlanBuilder juz={currentJuz} verses={verses} />
+          )}
 
           {/* LECTEUR CONTINU DE LA SOURATE */}
           {verses.length > 0 && (

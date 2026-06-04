@@ -25,7 +25,7 @@ export function MarkLearnedButton({ verseId }: { verseId: string }) {
     <button
       onClick={handleMarkLearned}
       disabled={loading}
-      className="flex items-center gap-2 rounded-full bg-emerald-900 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-emerald-950/15 transition hover:-translate-y-0.5 hover:bg-emerald-800 disabled:opacity-50"
+      className="w-fit flex items-center gap-2 rounded-full bg-emerald-900 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-emerald-950/15 transition hover:-translate-y-0.5 hover:bg-emerald-800 disabled:opacity-50"
     >
       {loading ? (
         <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -37,7 +37,7 @@ export function MarkLearnedButton({ verseId }: { verseId: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
         </svg>
       )}
-      {loading ? "Enregistrement..." : "Marquer comme appris"}
+      {loading ? "Enregistrement..." : "Marquer appris"}
     </button>
   );
 }
