@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { generatePersonalizedPlan } from "./ai";
 
 export async function getDashboardData() {
   const session = await auth();
@@ -76,6 +77,16 @@ export async function createInitialProfile(data: {
     throw new Error("Unauthorized");
   }
 
+  // 1. Demander à l'IA de générer le plan parfait
+  const aiPlan = await generatePersonalizedPlan({
+    type: data.type,
+    ageRange: data.ageRange,
+    dailyMinutes: data.dailyMinutes,
+    level: data.level,
+    objective: data.objective,
+  });
+
+  // 2. Créer le profil en base de données avec les données de l'IA
   const profile = await db.profile.create({
     data: {
       userId: session.user.id,
@@ -83,11 +94,11 @@ export async function createInitialProfile(data: {
       learningPlans: {
         create: {
           targetLabel: data.objective,
-          versesPerDay: Math.max(1, Math.floor(data.dailyMinutes / 10)), // Rough estimate
-          recommendedMethods: [data.preferredMethod, "SRS"],
-          milestone30: "1 Hizb",
-          milestone90: "3 Hizb",
-          milestone180: "5 Hizb",
+          versesPerDay: aiPlan.versesPerDay,
+          recommendedMethods: aiPlan.recommendedMethods,
+          milestone30: aiPlan.milestone30,
+          milestone90: aiPlan.milestone90,
+          milestone180: aiPlan.milestone180,
         },
       },
     },

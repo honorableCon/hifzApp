@@ -54,19 +54,19 @@ export default async function ProgressPage() {
   });
 
   const metrics = [
-    { label: "Versets Maîtrisés", value: totalMastered.toString(), trend: "🏆", helper: "Mémorisation solide" },
-    { label: "En cours d'apprentissage", value: totalLearning.toString(), trend: "📖", helper: "Nouvelles mémorisations" },
-    { label: "En révision (SRS)", value: totalReviewing.toString(), trend: "🔄", helper: "Entretien de la mémoire" },
-    { label: "Rétention globale", value: `${retentionRate}%`, trend: "📈", helper: "Efficacité des révisions" },
+    { label: "Versets Maîtrisés", value: totalMastered.toString(), trend: "trophy", helper: "Mémorisation solide" },
+    { label: "En cours d'apprentissage", value: totalLearning.toString(), trend: "book", helper: "Nouvelles mémorisations" },
+    { label: "En révision (SRS)", value: totalReviewing.toString(), trend: "refresh", helper: "Entretien de la mémoire" },
+    { label: "Rétention globale", value: `${retentionRate}%`, trend: "chart", helper: "Efficacité des révisions" },
   ];
 
   return (
     <PageFrame>
-      <main>
+      <main className="pb-24 lg:pb-10"> {/* Padding for mobile bottom bar */}
         <PageHero
           eyebrow="Analytics"
-          title="Mesurer sans écraser: progression, rétention, régularité."
-          description="Rapports destinés à l’apprenant, aux parents et aux enseignants, avec indicateurs lisibles."
+          title="Mon Suivi & Progression"
+          description="Mesurez votre régularité, votre rétention et vos efforts de mémorisation."
         />
 
         <section className="mx-auto grid max-w-7xl gap-5 px-5 pb-14 lg:grid-cols-4 lg:px-8">

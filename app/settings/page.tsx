@@ -24,7 +24,7 @@ export default async function SettingsPage() {
 
   return (
     <PageFrame>
-      <main>
+      <main className="pb-24 lg:pb-10"> {/* Padding for mobile bottom bar */}
         <PageHero
           eyebrow="Settings"
           title="Préférences et profil"

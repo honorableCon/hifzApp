@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { PageFrame, PageHero } from "../components/app-shell";
 import { MetricCard, Panel, SectionTitle } from "../components/cards";
 import { getDashboardData } from "../actions/dashboard";
+import { getDailySession } from "../actions/session";
 import { weeklyHeatmap } from "../data";
 import { auth } from "@/auth";
+import { AiDashboardMotivation } from "../components/ai-dashboard-motivation";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -13,6 +15,7 @@ export default async function DashboardPage() {
   if (!userId) return null;
 
   const data = await getDashboardData();
+  const dailySession = await getDailySession();
 
   if (!data.profile) {
     // Si l'utilisateur n'a pas de profil, on devrait le rediriger vers l'onboarding
@@ -33,25 +36,85 @@ export default async function DashboardPage() {
   }
 
   const metrics = [
-    { label: "Série en cours", value: `${data.metrics?.streak ?? 0} j`, trend: "🔥", helper: "Mémorisation ou révision." },
+    { label: "Série en cours", value: `${data.metrics?.streak ?? 0} j`, trend: "flame", helper: "Mémorisation ou révision." },
     { label: "Temps aujourd'hui", value: `${data.metrics?.minutesToday ?? 0} min`, trend: `Objectif: ${data.profile.dailyMinutes}`, helper: "Sur la base du PMP." },
-    { label: "Versets maîtrisés", value: (data.metrics?.versesMastered ?? 0).toString(), trend: "🏆", helper: "Status MASTERED atteint." },
-    { label: "Rétention", value: `${data.metrics?.retentionRate ?? 0}%`, trend: "📈", helper: "Force globale du profil." },
+    { label: "Versets maîtrisés", value: (data.metrics?.versesMastered ?? 0).toString(), trend: "trophy", helper: "Status MASTERED atteint." },
+    { label: "Rétention", value: `${data.metrics?.retentionRate ?? 0}%`, trend: "chart", helper: "Force globale du profil." },
   ];
 
   return (
     <PageFrame session={session}>
-      <main>
+      <main className="pb-24 lg:pb-10"> {/* Extra padding for mobile bottom bar */}
         <PageHero
           eyebrow="Dashboard"
           title={`Salam, ${session?.user?.name || "Apprenant"}`}
           description="Votre vue d'ensemble sur votre progression de mémorisation."
         />
 
-        <section className="mx-auto grid max-w-7xl gap-5 px-5 pb-14 lg:grid-cols-4 lg:px-8">
-          {metrics.map((metric) => (
-            <MetricCard key={metric.label} metric={metric} />
-          ))}
+        <section className="mx-auto max-w-7xl px-5 lg:px-8 pb-14">
+          {/* AI MOTIVATION WIDGET */}
+          <AiDashboardMotivation userName={session?.user?.name || "Apprenant"} streak={data.metrics?.streak ?? 0} />
+
+          {/* DAILY SESSION CALL TO ACTION - LE COEUR DE L'APP */}
+          <div className="mb-10 rounded-[2.5rem] bg-emerald-900 p-8 text-center shadow-xl shadow-emerald-950/20 md:p-12 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')" }}></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-2xl md:text-4xl font-black text-amber-200 mb-4">
+                Prêt pour aujourd'hui ?
+              </h2>
+              <p className="text-emerald-50 max-w-xl mx-auto mb-8 text-lg">
+                Votre plan est généré. Vous avez <strong>{dailySession.reviews?.length || 0} révisions</strong> en attente et <strong>{dailySession.newVerses?.length || 0} nouveaux versets</strong> à apprendre.
+              </p>
+              
+              <Link 
+                href="/session"
+                className="inline-flex items-center gap-3 rounded-full bg-amber-200 px-8 py-4 text-lg font-black text-emerald-950 transition hover:bg-white hover:-translate-y-1 hover:shadow-xl"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Commencer ma session
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 mb-10">
+            {metrics.map((metric) => (
+              <MetricCard key={metric.label} metric={metric} />
+            ))}
+          </div>
+
+          {/* AI GENERATED PLAN MILESTONES */}
+          {data.profile.learningPlans && data.profile.learningPlans.length > 0 && (
+            <div className="rounded-[2.5rem] border border-emerald-950/10 bg-white/75 p-8 shadow-xl shadow-emerald-950/5">
+              <h3 className="text-xl font-black text-emerald-950 mb-6 flex items-center gap-2">
+                <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Votre Plan IA (PMP)
+              </h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100">
+                  <p className="text-sm font-bold text-emerald-900/60 mb-2">Objectif 30 Jours</p>
+                  <p className="font-medium text-emerald-950">{data.profile.learningPlans[0].milestone30}</p>
+                </div>
+                <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100">
+                  <p className="text-sm font-bold text-emerald-900/60 mb-2">Objectif 90 Jours</p>
+                  <p className="font-medium text-emerald-950">{data.profile.learningPlans[0].milestone90}</p>
+                </div>
+                <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-100">
+                  <p className="text-sm font-bold text-emerald-900/60 mb-2">Objectif 6 Mois</p>
+                  <p className="font-medium text-emerald-950">{data.profile.learningPlans[0].milestone180}</p>
+                </div>
+              </div>
+              <p className="mt-6 text-sm text-center text-emerald-900/60">
+                Rythme recommandé par l'Ustadh IA : <strong>{data.profile.learningPlans[0].versesPerDay} versets / jour</strong> via la méthode <strong>{data.profile.learningPlans[0].recommendedMethods[0]}</strong>.
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="mx-auto grid max-w-7xl gap-6 px-5 pb-16 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">

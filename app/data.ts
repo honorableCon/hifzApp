@@ -11,13 +11,10 @@ export type Method = {
 };
 
 export const navigation: NavItem[] = [
-  { label: "Accueil", href: "/" },
   { label: "Dashboard", href: "/dashboard" },
-  { label: "Mémoriser", href: "/memorize" },
-  { label: "Réviser", href: "/review" },
-  { label: "Écouter", href: "/listen" },
+  { label: "Session", href: "/session" },
   { label: "Mushaf", href: "/quran" },
-  { label: "Progression", href: "/progress" },
+  { label: "Suivi", href: "/progress" },
   { label: "Parent", href: "/parent" },
 ];
 

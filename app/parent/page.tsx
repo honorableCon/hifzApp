@@ -11,7 +11,7 @@ const controls = [
 export default function ParentPage() {
   return (
     <PageFrame>
-      <main>
+      <main className="pb-24 lg:pb-10">
         <PageHero
           eyebrow="Mode enfant"
           title="Un cadre simple pour les enfants et rassurant pour les parents."
@@ -26,8 +26,10 @@ export default function ParentPage() {
               description="Un parcours visuel court pour encourager la régularité."
             />
             <div className="rounded-[2rem] bg-amber-100 p-6 text-center">
-              <div className="mx-auto grid size-24 place-items-center rounded-full bg-white text-5xl">
-                🐢
+              <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
               <h2 className="mt-5 text-3xl font-black text-amber-950">
                 Sami a révisé 12 minutes

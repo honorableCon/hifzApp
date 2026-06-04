@@ -35,7 +35,7 @@ export type QuranCloudResponse<T> = {
  */
 export async function getSurahData(
   surahNumber: number,
-  translationEdition = "fr.hameedullah",
+  translationEdition = "fr.hamidullah",
   audioEdition = "ar.alafasy"
 ) {
   // On demande 3 éditions en même temps : Arabe Uthmani, Traduction, Audio

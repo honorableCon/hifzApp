@@ -4,98 +4,121 @@ import { db } from "@/lib/db";
 import { AddToPlanButton } from "./add-button";
 import { AudioButton } from "../components/audio-button";
 import Link from "next/link";
+import { getAllSurahsMeta, JUZ_COUNT } from "@/lib/quran-meta";
+import { QuranIndex } from "./quran-index";
+import { FullSurahPlayer } from "./full-surah-player";
 
 export default async function QuranPage(props: {
-  searchParams: Promise<{ surah?: string }>;
+  searchParams: Promise<{ surah?: string; juz?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const currentSurah = searchParams.surah ? parseInt(searchParams.surah) : 67; // Al-Mulk par défaut
+  const currentSurah = searchParams.surah ? parseInt(searchParams.surah) : null;
+  const currentJuz = searchParams.juz ? parseInt(searchParams.juz) : null;
 
-  // Récupérer les versets de la sourate sélectionnée
-  const verses = await db.verse.findMany({
-    where: { surahNumber: currentSurah },
-    orderBy: { verseNumber: 'asc' }
-  });
+  const isIndex = !currentSurah && !currentJuz;
 
-  // Liste des sourates disponibles (celles en BDD)
-  const availableSurahs = await db.verse.findMany({
-    select: { surahNumber: true },
-    distinct: ['surahNumber'],
-    orderBy: { surahNumber: 'asc' }
-  });
+  // Si c'est l'index, on affiche la grille des sourates/juz
+  if (isIndex) {
+    const surahsMeta = await getAllSurahsMeta();
+    return (
+      <PageFrame>
+        <main className="pb-20">
+          <PageHero
+            eyebrow="Mushaf"
+            title="Le Saint Coran"
+            description="Explorez, lisez et ajoutez des passages à votre plan de mémorisation."
+          />
+          <section className="mx-auto max-w-7xl px-5 lg:px-8 mt-8">
+            <QuranIndex surahs={surahsMeta} juzCount={JUZ_COUNT} />
+          </section>
+        </main>
+      </PageFrame>
+    );
+  }
+
+  // Sinon, on affiche le mode lecture (Reader)
+  let verses: any[] = [];
+  let title = "";
+  let description = "";
+
+  if (currentSurah) {
+    verses = await db.verse.findMany({
+      where: { surahNumber: currentSurah },
+      orderBy: { verseNumber: 'asc' }
+    });
+    const surahsMeta = await getAllSurahsMeta();
+    const meta = surahsMeta.find(s => s.number === currentSurah);
+    title = meta ? `${meta.number}. ${meta.englishName}` : `Sourate ${currentSurah}`;
+    description = meta ? `${meta.name} • ${meta.numberOfAyahs} versets` : `${verses.length} versets`;
+  } else if (currentJuz) {
+    verses = await db.verse.findMany({
+      where: { juzNumber: currentJuz },
+      orderBy: [
+        { surahNumber: 'asc' },
+        { verseNumber: 'asc' }
+      ]
+    });
+    title = `Juz ${currentJuz}`;
+    description = `${verses.length} versets`;
+  }
 
   return (
     <PageFrame>
-      <main>
+      <main className="pb-20">
         <PageHero
-          eyebrow="Mushaf"
-          title="Lecture arabe RTL avec repères pédagogiques."
-          description="Un écran pour rechercher, lire, écouter et envoyer un passage vers mémorisation ou révision."
+          eyebrow="Lecture"
+          title={title}
+          description={description}
         />
 
-        <section className="mx-auto max-w-7xl px-5 pb-20 lg:px-8 flex flex-col md:flex-row gap-6">
-          {/* Sidebar de navigation */}
-          <div className="md:w-64 shrink-0">
-            <Panel className="sticky top-24 p-4">
-              <h3 className="font-black text-emerald-950 mb-4">Sourates disponibles</h3>
-              <div className="flex flex-col gap-2">
-                {availableSurahs.map(({ surahNumber }: any) => (
-                  <Link
-                    key={surahNumber}
-                    href={`/quran?surah=${surahNumber}`}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition ${
-                      currentSurah === surahNumber 
-                        ? "bg-emerald-900 text-white" 
-                        : "bg-white text-emerald-900 hover:bg-emerald-50 border border-emerald-950/10"
-                    }`}
+        <section className="mx-auto max-w-4xl px-5 lg:px-8 mt-8">
+          <div className="mb-6">
+            <Link 
+              href="/quran" 
+              className="inline-flex items-center gap-2 text-emerald-800 font-bold hover:text-emerald-950 transition bg-white/50 px-4 py-2 rounded-full shadow-sm"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Retour à l'index
+            </Link>
+          </div>
+
+          {/* LECTEUR CONTINU DE LA SOURATE */}
+          {verses.length > 0 && (
+            <FullSurahPlayer verses={verses} />
+          )}
+
+          <Panel>
+            <div className="space-y-12">
+              {verses.length === 0 ? (
+                <p className="text-emerald-900 text-center py-10 font-medium">Les versets sont en cours d'importation dans la base de données... Revenez dans quelques instants.</p>
+              ) : (
+                verses.map((verse: any) => (
+                  <article
+                    key={verse.id}
+                    className="relative group border-b border-emerald-950/5 pb-12 last:border-0 last:pb-0"
                   >
-                    Sourate {surahNumber}
-                  </Link>
-                ))}
-              </div>
-            </Panel>
-          </div>
-
-          <div className="flex-1">
-            <Panel>
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-8">
-                <SectionTitle
-                  kicker="Lecture"
-                  title={`Sourate ${currentSurah}`}
-                  description={`${verses.length} versets`}
-                />
-              </div>
-
-              <div className="space-y-5">
-                {verses.length === 0 ? (
-                  <p className="text-emerald-900">Aucun verset disponible pour cette sourate dans la base de données.</p>
-                ) : (
-                  verses.map((verse: any) => (
-                    <article
-                      key={verse.id}
-                      className="rounded-[2rem] border border-emerald-950/10 bg-[#fbfaf3] p-6"
-                    >
-                      <div className="flex items-start justify-between gap-5">
-                        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-950 text-sm font-black text-emerald-50">
-                          {verse.verseNumber}
-                        </span>
-                        <p className="font-arabic text-right text-4xl leading-[2] text-emerald-950">
-                          {verse.arabic}
-                        </p>
-                      </div>
-                      <p className="mt-5 text-base leading-7 text-emerald-950/70">
-                        {verse.translation}
+                    <div className="flex items-start justify-between gap-5 mb-6">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-100 text-sm font-black text-emerald-950">
+                        {verse.verseNumber}
+                      </span>
+                      <p className="font-arabic text-right text-4xl md:text-5xl leading-[2.2] text-emerald-950" dir="rtl">
+                        {verse.arabic}
                       </p>
-                      <div className="mt-5 flex flex-wrap gap-3">
-                        <AudioButton src={verse.audioUrl} />
-                        <AddToPlanButton verseId={verse.id} />
-                      </div>
-                    </article>
-                  ))
-                )}
-              </div>
-            </Panel>
-          </div>
+                    </div>
+                    <p className="text-base leading-7 text-emerald-950/70 pl-12">
+                      {verse.translation}
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center gap-3 pl-12 opacity-50 group-hover:opacity-100 transition-opacity">
+                      <AudioButton src={verse.audioUrl} />
+                      <AddToPlanButton verseId={verse.id} />
+                    </div>
+                  </article>
+                ))
+              )}
+            </div>
+          </Panel>
         </section>
       </main>
     </PageFrame>
