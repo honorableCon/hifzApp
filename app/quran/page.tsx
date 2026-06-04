@@ -99,19 +99,19 @@ export default async function QuranPage(props: {
                     key={verse.id}
                     className="relative group border-b border-emerald-950/5 pb-12 last:border-0 last:pb-0"
                   >
-                    <div className="flex items-start justify-between gap-5 mb-6">
-                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-100 text-sm font-black text-emerald-950">
+                    <div className="flex items-start justify-between gap-4 md:gap-5 mb-6">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-100 text-sm font-black text-emerald-950 mt-2">
                         {verse.verseNumber}
                       </span>
-                      <p className="font-arabic text-right text-4xl md:text-5xl leading-[2.2] text-emerald-950" dir="rtl">
+                      <p className="font-arabic text-right text-3xl md:text-4xl lg:text-5xl leading-[2.2] text-emerald-950 flex-1 break-words min-w-0" dir="rtl">
                         {verse.arabic}
                       </p>
                     </div>
-                    <p className="text-base leading-7 text-emerald-950/70 pl-12">
+                    <p className="text-base leading-7 text-emerald-950/70 pl-14 md:pl-15">
                       {verse.translation}
                     </p>
-                    <div className="mt-5 flex flex-wrap items-center gap-3 pl-12 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <AudioButton src={verse.audioUrl} />
+                    <div className="mt-5 flex flex-wrap items-center gap-3 pl-14 md:pl-15 opacity-100 md:opacity-50 group-hover:opacity-100 transition-opacity">
+                      <AudioButton src={verse.audioUrl} allowControls={true} />
                       <AddToPlanButton verseId={verse.id} />
                     </div>
                   </article>
