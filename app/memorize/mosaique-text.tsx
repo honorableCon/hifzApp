@@ -18,23 +18,54 @@ export function MosaiqueText({ text }: { text: string }) {
   const hideAll = () => setHiddenWords(new Array(words.length).fill(true));
   const showAll = () => setHiddenWords(new Array(words.length).fill(false));
 
+  const hideRandomPercentage = (percentage: number) => {
+    const countToHide = Math.round((words.length * percentage) / 100);
+    const newHidden = new Array(words.length).fill(false);
+    
+    // Créer un tableau d'index et le mélanger (algorithme de Fisher-Yates)
+    const indices = Array.from({ length: words.length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    
+    // Cacher le nombre calculé de mots
+    for (let i = 0; i < countToHide; i++) {
+      newHidden[indices[i]] = true;
+    }
+    
+    setHiddenWords(newHidden);
+  };
+
   return (
     <div>
-      <div className="flex justify-end gap-2 mb-4">
+      <div className="flex flex-wrap justify-end gap-2 mb-4">
         <button 
           onClick={showAll}
-          className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full hover:bg-emerald-100"
+          className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors"
         >
           Tout afficher
         </button>
         <button 
+          onClick={() => hideRandomPercentage(50)}
+          className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors"
+        >
+          Masquer 50%
+        </button>
+        <button 
+          onClick={() => hideRandomPercentage(75)}
+          className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors"
+        >
+          Masquer 75%
+        </button>
+        <button 
           onClick={hideAll}
-          className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full hover:bg-emerald-100"
+          className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors"
         >
           Tout masquer
         </button>
       </div>
-      <p className="font-arabic text-right text-4xl leading-[2] md:text-5xl" style={{ direction: "rtl" }}>
+      <p className="font-arabic text-right text-3xl leading-[2] md:text-5xl" style={{ direction: "rtl" }}>
         {words.map((word, i) => (
           <span
             key={`${i}-${word}`}
