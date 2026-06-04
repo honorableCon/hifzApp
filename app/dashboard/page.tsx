@@ -163,7 +163,6 @@ export default async function DashboardPage() {
                 `Profil: ${data.profile.type}`,
                 `Objectif: ${data.profile.objective}`,
                 `Méthode: ${data.profile.preferredMethod}`,
-                `Récitateur: ${data.profile.preferredReciter}`,
               ].map((answer) => (
                 <p
                   key={answer}

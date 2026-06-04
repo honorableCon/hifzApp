@@ -11,31 +11,51 @@ export function QuranIndex({
   surahs: SurahMeta[];
   juzCount: number;
 }) {
-  const [activeTab, setActiveTab] = useState<"surahs" | "juzs">("surahs");
+  const [activeTab, setActiveTab] = useState<"surahs" | "juzs" | "hizbs" | "manzils">("surahs");
 
   return (
     <div className="space-y-8">
       {/* Tabs */}
-      <div className="flex p-1 space-x-1 bg-emerald-900/10 rounded-2xl max-w-sm mx-auto">
+      <div className="flex flex-wrap p-1 gap-1 bg-emerald-900/10 rounded-2xl max-w-2xl mx-auto">
         <button
           onClick={() => setActiveTab("surahs")}
-          className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition ${
+          className={`flex-1 min-w-[100px] py-2.5 text-sm font-bold rounded-xl transition ${
             activeTab === "surahs"
               ? "bg-white text-emerald-950 shadow-sm"
               : "text-emerald-800 hover:bg-white/50"
           }`}
         >
-          Par Sourate
+          Sourates
         </button>
         <button
           onClick={() => setActiveTab("juzs")}
-          className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition ${
+          className={`flex-1 min-w-[100px] py-2.5 text-sm font-bold rounded-xl transition ${
             activeTab === "juzs"
               ? "bg-white text-emerald-950 shadow-sm"
               : "text-emerald-800 hover:bg-white/50"
           }`}
         >
-          Par Juz
+          Juzs
+        </button>
+        <button
+          onClick={() => setActiveTab("hizbs")}
+          className={`flex-1 min-w-[100px] py-2.5 text-sm font-bold rounded-xl transition ${
+            activeTab === "hizbs"
+              ? "bg-white text-emerald-950 shadow-sm"
+              : "text-emerald-800 hover:bg-white/50"
+          }`}
+        >
+          Hizbs
+        </button>
+        <button
+          onClick={() => setActiveTab("manzils")}
+          className={`flex-1 min-w-[100px] py-2.5 text-sm font-bold rounded-xl transition ${
+            activeTab === "manzils"
+              ? "bg-white text-emerald-950 shadow-sm"
+              : "text-emerald-800 hover:bg-white/50"
+          }`}
+        >
+          Manzils
         </button>
       </div>
 
@@ -83,6 +103,52 @@ export function QuranIndex({
                 </div>
                 <div className="text-sm font-bold text-emerald-950/60 uppercase tracking-widest">
                   Juz
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Hizbs Grid */}
+      {activeTab === "hizbs" && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 60 }).map((_, i) => {
+            const hizbNumber = i + 1;
+            return (
+              <Link
+                key={hizbNumber}
+                href={`/quran?hizb=${hizbNumber}`}
+                className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-emerald-950/10 bg-white/60 hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition"
+              >
+                <div className="text-3xl font-black text-emerald-900">
+                  {hizbNumber}
+                </div>
+                <div className="text-sm font-bold text-emerald-950/60 uppercase tracking-widest">
+                  Hizb
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Manzils Grid */}
+      {activeTab === "manzils" && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 7 }).map((_, i) => {
+            const manzilNumber = i + 1;
+            return (
+              <Link
+                key={manzilNumber}
+                href={`/quran?manzil=${manzilNumber}`}
+                className="flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border border-emerald-950/10 bg-white/60 hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition"
+              >
+                <div className="text-3xl font-black text-emerald-900">
+                  {manzilNumber}
+                </div>
+                <div className="text-sm font-bold text-emerald-950/60 uppercase tracking-widest">
+                  Manzil
                 </div>
               </Link>
             );

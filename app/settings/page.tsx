@@ -52,15 +52,13 @@ export default async function SettingsPage() {
             <Panel>
               <SectionTitle
                 kicker="Système"
-                title="Informations techniques"
-                description="Configuration actuelle de votre compte."
+                title="Informations de compte"
+                description="Vos informations de base."
               />
               <div className="grid gap-4 md:grid-cols-2 mt-6">
                 {[
-                  ["Compte", session.user.email],
-                  ["Thème", "Clair avec support sombre système"],
-                  ["Stockage", "PostgreSQL (Neon)"],
-                  ["Authentification", "NextAuth v5 + Bcrypt"],
+                  ["Email", session.user.email],
+                  ["Rôle", "Apprenant"],
                 ].map(([label, value]) => (
                   <div
                     key={label}

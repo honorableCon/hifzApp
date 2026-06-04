@@ -11,11 +11,26 @@ const LEVEL_SETTINGS = {
   hafiz: { label: "Hafiz (Révision)", wordsPerDay: 400, desc: "Révision intensive (~1/4 de Juz/j)", color: "bg-purple-100 text-purple-800 border-purple-200" },
 };
 
-export function JuzPlanBuilder({ juz, verses }: { juz: number, verses: any[] }) {
+export function JuzPlanBuilder({ 
+  juz, 
+  hizb,
+  manzil,
+  verses 
+}: { 
+  juz?: number | null; 
+  hizb?: number | null;
+  manzil?: number | null;
+  verses: any[];
+}) {
   const [level, setLevel] = useState<Level>("intermediate");
   const [showCalendar, setShowCalendar] = useState(false);
 
   const targetWords = LEVEL_SETTINGS[level].wordsPerDay;
+  
+  let planTitle = "Plan de Mémorisation";
+  if (juz) planTitle += ` (Juz ${juz})`;
+  else if (hizb) planTitle += ` (Hizb ${hizb})`;
+  else if (manzil) planTitle += ` (Manzil ${manzil})`;
 
   const generatePlan = () => {
     const days = [];
@@ -71,10 +86,10 @@ export function JuzPlanBuilder({ juz, verses }: { juz: number, verses: any[] }) 
           <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
-          <h2 className="text-xl font-bold text-emerald-950">Plan de Mémorisation (Juz {juz})</h2>
+          <h2 className="text-xl font-bold text-emerald-950">{planTitle}</h2>
         </div>
         <p className="text-emerald-950/60 text-sm">
-          Générez un calendrier d'apprentissage adapté à votre rythme pour mémoriser les {verses.length} versets de ce Juz.
+          Générez un calendrier d'apprentissage adapté à votre rythme pour mémoriser les {verses.length} versets de cette section.
         </p>
 
         {!showCalendar ? (

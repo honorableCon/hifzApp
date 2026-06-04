@@ -158,6 +158,9 @@ model Verse {
   surahNumber   Int
   verseNumber   Int
   juzNumber     Int
+  hizbNumber    Int?           // 1-60
+  rubNumber     Int?           // 1-240 (Rub' al-Hizb)
+  manzilNumber  Int?           // 1-7
   arabic        String
   translation   String
   tajwidHints   String?
@@ -168,6 +171,10 @@ model Verse {
   srsCards      SrsCard[]
 
   @@unique([surahNumber, verseNumber])
+  @@index([juzNumber])
+  @@index([hizbNumber])
+  @@index([rubNumber])
+  @@index([manzilNumber])
 }
 
 model Memorization {

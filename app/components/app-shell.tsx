@@ -17,15 +17,20 @@ export function AppHeader({ session }: { session: any }) {
           <span className="grid size-11 place-items-center rounded-2xl bg-emerald-900 text-xl text-amber-200 shadow-lg shadow-emerald-950/15">
             ح
           </span>
-          <span>
-            <span className="block text-lg font-black tracking-tight text-emerald-950">
-              HifzApp
-            </span>
-            <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-              Memorisation
-            </span>
-          </span>
-        </Link>
+          <div className="flex items-center gap-3">
+              <span>
+                <span className="block text-lg font-black tracking-tight text-emerald-950">
+                  HifzApp
+                </span>
+                <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                  Memorisation
+                </span>
+              </span>
+              <span className="hidden md:inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                V1.0
+              </span>
+            </div>
+          </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-1 rounded-full border border-emerald-950/10 bg-white/65 p-1 shadow-sm lg:flex">
@@ -139,9 +144,8 @@ export function AppFooter() {
           <div>
             <p className="text-lg font-black">HifzApp</p>
             <p className="mt-2 max-w-xl text-sm leading-6 text-emerald-50/70">
-              Prototype MVP basé sur le CDC : plan personnalisé, SRS,
-              gamification, parcours enfant et expérience RTL/LTR.
-            </p>
+                Application complète pour la mémorisation du Coran avec un système de répétition espacée, parcours personnalisé et motivation IA.
+              </p>
           </div>
           <Link
             href="/settings"

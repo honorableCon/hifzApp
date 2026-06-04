@@ -10,13 +10,15 @@ import { FullSurahPlayer } from "./full-surah-player";
 import { JuzPlanBuilder } from "./juz-plan-builder";
 
 export default async function QuranPage(props: {
-  searchParams: Promise<{ surah?: string; juz?: string }>;
+  searchParams: Promise<{ surah?: string; juz?: string; hizb?: string; manzil?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const currentSurah = searchParams.surah ? parseInt(searchParams.surah) : null;
   const currentJuz = searchParams.juz ? parseInt(searchParams.juz) : null;
+  const currentHizb = searchParams.hizb ? parseInt(searchParams.hizb) : null;
+  const currentManzil = searchParams.manzil ? parseInt(searchParams.manzil) : null;
 
-  const isIndex = !currentSurah && !currentJuz;
+  const isIndex = !currentSurah && !currentJuz && !currentHizb && !currentManzil;
 
   // Si c'est l'index, on affiche la grille des sourates/juz
   if (isIndex) {
@@ -61,6 +63,26 @@ export default async function QuranPage(props: {
     });
     title = `Juz ${currentJuz}`;
     description = `${verses.length} versets`;
+  } else if (currentHizb) {
+    verses = await db.verse.findMany({
+      where: { hizbNumber: currentHizb },
+      orderBy: [
+        { surahNumber: 'asc' },
+        { verseNumber: 'asc' }
+      ]
+    });
+    title = `Hizb ${currentHizb}`;
+    description = `${verses.length} versets`;
+  } else if (currentManzil) {
+    verses = await db.verse.findMany({
+      where: { manzilNumber: currentManzil },
+      orderBy: [
+        { surahNumber: 'asc' },
+        { verseNumber: 'asc' }
+      ]
+    });
+    title = `Manzil ${currentManzil}`;
+    description = `${verses.length} versets`;
   }
 
   return (
@@ -85,9 +107,14 @@ export default async function QuranPage(props: {
             </Link>
           </div>
 
-          {/* BUILDER DE PLAN DE MEMORISATION (POUR JUZ UNIQUEMENT) */}
-          {currentJuz && verses.length > 0 && (
-            <JuzPlanBuilder juz={currentJuz} verses={verses} />
+          {/* BUILDER DE PLAN DE MEMORISATION (POUR JUZ, HIZB OU MANZIL UNIQUEMENT) */}
+          {(currentJuz || currentHizb || currentManzil) && verses.length > 0 && (
+            <JuzPlanBuilder 
+              juz={currentJuz} 
+              hizb={currentHizb}
+              manzil={currentManzil}
+              verses={verses} 
+            />
           )}
 
           {/* LECTEUR CONTINU DE LA SOURATE */}

@@ -56,6 +56,9 @@ export async function getSurahData(
       surahNumber: arabicData.number,
       verseNumber: ayah.numberInSurah,
       juzNumber: ayah.juz,
+      hizbNumber: Math.ceil(ayah.hizbQuarter / 4), // 1 Hizb = 4 quarters
+      rubNumber: ayah.hizbQuarter,
+      manzilNumber: ayah.manzil,
       arabic: ayah.text,
       translation: translationData.ayahs[index].text,
       audioUrl: audioData.ayahs[index].audio,
