@@ -1,4 +1,8 @@
-import type { Metric } from "../data";
+export type Metric = {
+  label: string;
+  value: string | number;
+  helper: string;
+};
 
 export function SectionTitle({
   kicker,

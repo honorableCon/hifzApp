@@ -21,7 +21,6 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
 const productionRequiredKeys = [
   "DATABASE_URL",
-  "REDIS_URL",
   "AUTH_SECRET",
 ] as const satisfies readonly (keyof ServerEnv)[];
 

@@ -1,7 +1,22 @@
 import Link from "next/link";
 import { FeatureCard, Panel, SectionTitle } from "./components/cards";
 import { PageFrame } from "./components/app-shell";
-import { methods, profileAnswers, roadmap, sampleVerses } from "./data";
+import { methods, roadmap } from "./data";
+
+const sampleVerses = [
+  {
+    arabic: "تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+    tajwidHint: "Travaille le madd sur قَدِيرٌ et la fluidité du début.",
+  }
+];
+
+const profileAnswers = [
+  "Âge : 13–17 ans",
+  "Temps : 25 min / jour",
+  "Niveau : début Juz 30",
+  "Objectif : Sourate Al-Mulk",
+  "Réciteur : Mishary Alafasy",
+];
 
 const features = [
   {

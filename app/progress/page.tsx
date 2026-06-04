@@ -1,8 +1,65 @@
 import { PageFrame, PageHero } from "../components/app-shell";
 import { MetricCard, Panel, SectionTitle } from "../components/cards";
-import { badges, dashboardMetrics, weeklyHeatmap } from "../data";
+import { weeklyHeatmap } from "../data";
+import { db } from "@/lib/db";
+import { auth } from "@/auth";
+import Link from "next/link";
 
-export default function ProgressPage() {
+export default async function ProgressPage() {
+  const session = await auth();
+  
+  if (!session?.user?.id) {
+    return (
+      <PageFrame>
+        <main className="grid min-h-[60vh] place-items-center">
+          <p>Veuillez vous connecter pour voir vos statistiques.</p>
+        </main>
+      </PageFrame>
+    );
+  }
+
+  const profile = await db.profile.findFirst({
+    where: { userId: session.user.id },
+  });
+
+  if (!profile) return null;
+
+  // Calcul des statistiques réelles
+  const totalMastered = await db.memorization.count({
+    where: { profileId: profile.id, status: "MASTERED" },
+  });
+
+  const totalLearning = await db.memorization.count({
+    where: { profileId: profile.id, status: "LEARNING" },
+  });
+
+  const totalReviewing = await db.memorization.count({
+    where: { profileId: profile.id, status: "REVIEWING" },
+  });
+
+  const srsCards = await db.srsCard.findMany({
+    where: { profileId: profile.id },
+  });
+
+  // Calcul basique de la rétention moyenne (EaseFactor moyen converti en %)
+  const averageEaseFactor = srsCards.length > 0 
+    ? srsCards.reduce((acc: number, card: any) => acc + card.easeFactor, 0) / srsCards.length 
+    : 2.5; // Par défaut
+  const retentionRate = Math.min(100, Math.round((averageEaseFactor / 2.5) * 85));
+
+  // Récupération des badges de l'utilisateur
+  const userBadges = await db.userBadge.findMany({
+    where: { userId: session.user.id },
+    include: { badge: true },
+  });
+
+  const metrics = [
+    { label: "Versets Maîtrisés", value: totalMastered.toString(), trend: "🏆", helper: "Mémorisation solide" },
+    { label: "En cours d'apprentissage", value: totalLearning.toString(), trend: "📖", helper: "Nouvelles mémorisations" },
+    { label: "En révision (SRS)", value: totalReviewing.toString(), trend: "🔄", helper: "Entretien de la mémoire" },
+    { label: "Rétention globale", value: `${retentionRate}%`, trend: "📈", helper: "Efficacité des révisions" },
+  ];
+
   return (
     <PageFrame>
       <main>
@@ -13,7 +70,7 @@ export default function ProgressPage() {
         />
 
         <section className="mx-auto grid max-w-7xl gap-5 px-5 pb-14 lg:grid-cols-4 lg:px-8">
-          {dashboardMetrics.map((metric) => (
+          {metrics.map((metric) => (
             <MetricCard key={metric.label} metric={metric} />
           ))}
         </section>
@@ -30,7 +87,7 @@ export default function ProgressPage() {
                 <div key={day} className="text-center">
                   <div
                     className="rounded-2xl bg-emerald-800 text-xs font-black text-white"
-                    style={{ paddingBlock: `${Math.max(12, minutes / 2)}px` }}
+                    style={{ paddingBlock: `${Math.max(12, Number(minutes) / 2)}px` }}
                   >
                     {minutes}
                   </div>
@@ -49,13 +106,22 @@ export default function ProgressPage() {
               description="Les badges restent alignés avec la régularité réelle."
             />
             <div className="space-y-3">
-              {badges.map((badge) => (
-                <p
-                  key={badge}
-                  className="rounded-3xl bg-amber-100 p-4 text-sm font-black text-amber-900"
-                >
-                  🏅 {badge}
+              {userBadges.length === 0 && (
+                <p className="rounded-3xl border border-emerald-950/10 bg-emerald-50 p-4 text-sm font-bold text-emerald-900 text-center">
+                  Vous n'avez pas encore de badges. Continuez vos efforts !
                 </p>
+              )}
+              {userBadges.map(({ badge }: any) => (
+                <div
+                  key={badge.id}
+                  className="rounded-3xl bg-amber-100 p-4 flex items-center gap-4"
+                >
+                  <span className="text-2xl">{badge.icon}</span>
+                  <div>
+                    <h4 className="text-sm font-black text-amber-900">{badge.name}</h4>
+                    <p className="text-xs text-amber-800/70 mt-1">{badge.description}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </Panel>
