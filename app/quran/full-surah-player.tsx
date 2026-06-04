@@ -146,10 +146,10 @@ export function FullSurahPlayer({ verses }: { verses: any[] }) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="font-arabic text-xl text-right text-amber-200 truncate" dir="rtl">
+              <p className="font-arabic text-xl leading-relaxed text-right text-amber-200 break-words" dir="rtl">
                 {verses[currentVerseIndex].arabic}
               </p>
-              <div className="flex items-center justify-between mt-1">
+              <div className="flex items-center justify-between mt-2">
                 <div className="flex md:hidden items-center gap-2">
                   <button onClick={prevVerse} disabled={currentVerseIndex === 0} className="p-1 text-emerald-50/50 hover:text-emerald-50 disabled:opacity-30">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
